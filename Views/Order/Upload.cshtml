@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Purchase Order</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Upload Purchase Order</h2>
+        <form id="uploadForm">
+            <div class="mb-3">
+                <label for="pdfFile" class="form-label">Choose PDF:</label>
+                <input class="form-control" type="file" id="pdfFile" accept="application/pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload PDF</button>
+        </form>
+
+        <div id="pdfPreview" class="mt-4" style="display: none;">
+            <h3>Uploaded PDF:</h3>
+            <iframe id="pdfViewer" width="100%" height="500px"></iframe>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            
+            const fileInput = document.getElementById("pdfFile");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please choose a file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch('/Order/UploadPurchaseOrder', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const pdfUrl = data.url;
+                    document.getElementById("pdfViewer").src = pdfUrl;
+                    document.getElementById("pdfPreview").style.display = 'block';
+                } else {
+                    alert("Upload failed: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.log("Error:", error);
+                    alert("An error occurred while uploading the file.");
+            });
+        });
+    </script>
+</body>
+</html>
